@@ -1,4 +1,3 @@
-Voici la version Markdown sans emojis, prête à copier-coller dans README.md :
 # ECG Arrhythmia Detection Pipeline (C++)
 
 ## Overview

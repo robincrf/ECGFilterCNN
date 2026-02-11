@@ -1,69 +1,106 @@
-🫀 Projet d’Analyse et Détection d’Arhythmies Cardiaques en C++
-Objectif
-Ce projet implémente une chaîne de traitement complète des signaux ECG pour la détection automatique d’anomalies cardiaques (arythmies).
-L’objectif est de :
-Lire des signaux ECG bruts (fichiers texte ou CSV),
-Extraire les métadonnées (fréquence d’échantillonnage, label, taille, etc.),
-Prétraiter les signaux : centrage, filtrage, normalisation,
-Préparer les données pour des algorithmes d’apprentissage automatique.
+Voici le README prêt à copier-coller 👇
+ ECG Arrhythmia Detection Pipeline (C++)
+Overview
+This project implements an end-to-end ECG signal processing pipeline in C++ to prepare cardiac signals for automatic arrhythmia detection.
+The objective is to transform raw ECG recordings into clean, normalized and structured datasets ready for machine learning and classification tasks.
 
-   Étapes du pipeline
- 
-1 Extraction et stockage
-Chaque signal ECG est encapsulé dans une classe ECGmetadata :
-signal : vecteur d’échantillons (ex. 256 valeurs),
-label : type de battement (N, V, S, etc.),
-fs : fréquence d’échantillonnage (souvent 360 Hz),
-length : taille de la fenêtre (ex. 256 échantillons),
-Méthodes : accesseurs (getSignal(), getLabel(), etc.).
-Les signaux sont lus depuis un fichier brut :
+This project highlights:
+
+Signal processing fundamentals
+Biomedical data preprocessing
+High-performance implementation in modern C++
+ Objectives
+The pipeline automatically:
+Reads raw ECG signals from text/CSV files
+Extracts metadata (sampling rate, label, signal length)
+Applies advanced signal preprocessing
+Organizes data for downstream ML models
+Typical arrhythmia classes include:
+N — Normal beats
+V — Ventricular ectopic beats
+S — Supraventricular beats
+ Pipeline Architecture
+1. Data Extraction & Storage
+Each ECG window is encapsulated in a dedicated class:
+class ECGmetadata {
+    std::vector<double> signal;
+    std::string label;
+    int fs;        // sampling frequency (Hz)
+    int length;    // window size (samples)
+};
+Example raw file format:
 fs=360,centered=R,length=256,label=N
-0.02,0.05,0.12,0.35, ...
+0.02,0.05,0.12,0.35,...
 ...
 fs=360,centered=R,length=256,label=V
 ...
- Chaque bloc devient un objet ECGmetadata stocké dans :
+Each block is parsed and stored in:
 std::vector<ECGmetadata> allECG;
+ Signal Preprocessing Pipeline
+ECG signals are noisy and non-stationary.
+A multi-step preprocessing pipeline is applied to obtain robust and comparable signals.
+2.1 Detrending — Baseline Removal
+Removes slow baseline drift caused by respiration or electrode movement.
+Steps:
 
-2 Prétraitement du signal
+Mean subtraction (centering)
+Optional linear trend removal
+Effect:
+Stabilizes baseline
+Prevents low-frequency bias
+2.2 Savitzky–Golay Filtering (Zero-Phase)
+A Savitzky–Golay smoothing filter is applied to reduce high-frequency noise while preserving ECG morphology.
+Parameters:
 
-a) Detrend
-Retire la composante lente ou constante (ligne de base) :
-Soustraction de la moyenne (centrage),
-Optionnellement, suppression d’une pente linéaire si dérive visible.
-
-b) Filtre Savitzky–Golay
-Lissage polynomiale local pour réduire le bruit sans déformer le QRS :
-Fenêtre = 11 points (≈30 ms à 360 Hz),
-Ordre du polynôme = 3,
-Application aller-retour (zéro-phase) pour conserver la position du pic R.
-Avantage : supprime le bruit haute fréquence tout en préservant la forme physiologique du signal.
- 
-c) Z-score
-Normalisation pour rendre les signaux comparables :
-
- 
-Peut être appliqué :
-par signal (centrage + écart-type individuel),
-par position (même moyenne et écart-type sur tout le dataset).
-3 Organisation des données
-Les signaux sont ensuite regroupés selon leur label :
+Window size: 11 samples (~30 ms at 360 Hz)
+Polynomial order: 3
+Forward + backward filtering (zero-phase)
+Benefits:
+Preserves QRS complex shape
+Avoids peak distortion
+Maintains R-peak alignment
+2.3 Z-Score Normalization
+Signals are standardized to ensure comparability across patients and recordings:
+z = (x − μ) / σ
+Two normalization strategies:
+Per-signal normalization
+Dataset-level normalization
+📦 Dataset Organization
+Signals are grouped by arrhythmia class:
 std::map<std::string, std::vector<std::vector<double>>> signalsByClass;
-Exemple :
-signalsByClass["N"] → battements normaux,
-signalsByClass["V"] → battements ventriculaires.
-4️ Visualisation
-Les signaux prétraités peuvent être visualisés :
-Axe x : indices d’échantillons (0–255),
-Axe y : amplitude centrée et normalisée,
-Le pic R doit rester centré et non décalé après filtrage.
- Théorie des filtres utilisés
-Étape	Type de filtre	Effet principal	Remarques
-Detrend	Passe-haut (0 Hz)	supprime dérive lente	ligne de base stabilisée
-SG (11,3)	Passe-bas doux (~15–20 Hz)	lisse bruit HF	préserve les pentes
-Aller-retour	compensation de phase	évite le décalage du pic R	indispensable
-Z-score	normalisation statistique	comparabilité	sans effet sur la forme
+Example:
+signalsByClass["N"] → normal beats
+signalsByClass["V"] → ventricular beats
+This structure is ready for:
+Feature extraction
+Machine learning models
+Deep learning pipelines
+ Visualization
+Preprocessed signals can be plotted to validate processing quality.
+Expected properties:
 
- Compilation et exécution
-Compilation (avec g++)
+X-axis → sample index (0–255)
+Y-axis → normalized amplitude
+R-peak remains centered after filtering
+ Filtering Summary
+Step	Filter Type	Purpose
+Detrend	High-pass (~0 Hz)	Remove baseline drift
+Savitzky–Golay	Soft low-pass (~15–20 Hz)	Remove high-frequency noise
+Forward-Backward	Zero-phase	Preserve R-peak timing
+Z-score	Statistical normalization	Signal comparability
+ Build & Run
+Compilation
 g++ -std=c++17 -O2 src/*.cpp -I includes -o ecg_analyzer
+Execution
+./ecg_analyzer
+ Future Work
+Feature extraction (HRV, RR intervals)
+Integration with ML classifiers (SVM, Random Forest, CNN)
+Real-time ECG processing
+Support for MIT-BIH Arrhythmia Database
+Author: Robin Crifo
+Focus: Biomedical Signal Processing · C++ · Machine Learning Preparation
+
+
+
+

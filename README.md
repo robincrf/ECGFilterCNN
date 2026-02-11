@@ -1,5 +1,4 @@
-Voici le README prêt à copier-coller 👇
- ECG Arrhythmia Detection Pipeline (C++)
+ECG Arrhythmia Detection Pipeline (C++)
 Overview
 This project implements an end-to-end ECG signal processing pipeline in C++ to prepare cardiac signals for automatic arrhythmia detection.
 The objective is to transform raw ECG recordings into clean, normalized and structured datasets ready for machine learning and classification tasks.

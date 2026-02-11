@@ -1,22 +1,45 @@
-Parfait 👍 on va faire ça proprement.
-Je te réécris ta section complète en ajoutant une vraie hiérarchie Markdown avec les ## / ### / #### bien structurés pour GitHub.
-Tu pourras copier-coller tel quel dans ton README.
+# ECG Arrhythmia Detection Pipeline (C++)
 
-ECG Arrhythmia Detection Pipeline (C++)
-1. Overview
-This project implements a high-performance, end-to-end ECG signal processing pipeline written in Modern C++.
-It transforms raw and noisy cardiac recordings into structured, normalized datasets ready for machine learning and automated arrhythmia classification.
-1.1 Core Highlights
-Signal Processing Fundamentals
-Robust implementation of filtering and normalization.
-Biomedical Data Preprocessing
-Specialized handling of ECG morphology and cardiac patterns.
-High Performance
-Efficient data structures for processing large-scale datasets.
-2. Pipeline Architecture
-2.1 Data Extraction & Storage
-Each ECG window is encapsulated in a dedicated class to ensure data integrity, clarity, and easy access to signal parameters.
-ECG Window Metadata Class
+High-performance ECG preprocessing pipeline written in **Modern C++**.  
+Transforms raw ECG recordings into **clean, normalized datasets** ready for Machine Learning and Arrhythmia Classification.
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Pipeline Architecture](#pipeline-architecture)
+- [Signal Processing Steps](#signal-processing-steps)
+- [Project Structure](#project-structure)
+- [Build](#build)
+- [Dataset Output](#dataset-output)
+- [Future Work](#future-work)
+
+---
+
+## Overview
+
+Electrocardiogram recordings are noisy, heterogeneous and difficult to use directly for machine learning.  
+This project focuses on building a **fast and reliable preprocessing pipeline** capable of converting raw ECG signals into ML-ready windows.
+
+### Core Goals
+
+- Noise reduction and baseline correction  
+- Signal normalization and segmentation  
+- Window extraction with labels  
+- Dataset generation for deep learning models  
+
+---
+
+## Pipeline Architecture
+
+### Data Extraction & Storage
+
+Each ECG window is encapsulated in a dedicated metadata container to ensure **consistency and integrity** across the dataset.
+
+#### ECG Window Class
+
+```cpp
 #pragma once
 #include <vector>
 #include <string>
@@ -28,9 +51,125 @@ public:
     int fs;                      // Sampling frequency (Hz)
     int length;                  // Window size (samples)
 };
-2.2 Why this structure?
-Using a dedicated metadata container allows:
-Clean separation between raw signal and annotations
-Easier dataset export for ML pipelines
-Safer handling of large ECG datasets
-Clearer code organization across the project
+```
+
+### Why this structure?
+
+- Separation between **signal** and **annotation**
+- Easier export to ML frameworks
+- Safe handling of large datasets
+- Simple serialization to CSV / binary formats
+
+---
+
+## Signal Processing Steps
+
+### 1. Bandpass Filtering
+
+Removes:
+- Baseline wander (low frequency)
+- Powerline noise (50/60 Hz)
+- High frequency artifacts
+
+Typical ECG band:
+```
+0.5 Hz — 40 Hz
+```
+
+---
+
+### 2. Normalization
+
+Signals are normalized to remove amplitude variability between patients.
+
+Common methods:
+- Z-score normalization
+- Min-max scaling
+- Peak normalization
+
+Goal: make the model focus on **morphology**, not amplitude.
+
+---
+
+### 3. Window Segmentation
+
+Continuous ECG signals are split into fixed-length windows.
+
+Example:
+```
+Sampling rate: 360 Hz
+Window size:   5 seconds
+Samples/window: 1800
+```
+
+Each window receives a label based on annotations.
+
+---
+
+### 4. Dataset Export
+
+Processed windows are exported as:
+
+- CSV datasets
+- Binary datasets (faster loading)
+- Ready for Python / PyTorch / TensorFlow
+
+---
+
+## Project Structure
+
+```
+ECGFilterCNN/
+│
+├── include/
+│   └── ECGmetadata.hpp
+│
+├── src/
+│   ├── filters.cpp
+│   ├── normalization.cpp
+│   ├── segmentation.cpp
+│   └── dataset_export.cpp
+│
+├── data/
+└── README.md
+```
+
+---
+
+## Build
+
+### Requirements
+
+- C++17 or newer  
+- CMake ≥ 3.15  
+
+### Compile
+
+```bash
+mkdir build
+cd build
+cmake ..
+make
+```
+
+---
+
+## Dataset Output
+
+Final dataset format:
+
+| Field | Description |
+|------|-------------|
+| signal | ECG window samples |
+| label | Arrhythmia class |
+| fs | Sampling frequency |
+| length | Number of samples |
+
+This format is designed for seamless integration with ML pipelines.
+
+---
+
+## Future Work
+
+- R-peak detection  
+- Feature extraction (HRV, RR
